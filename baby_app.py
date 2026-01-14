@@ -59,7 +59,7 @@ with tab2:
     else:
         st.success(f"当前体重 {current_weight}kg：处于非常完美的标准区间！")
     
-    [Image of WHO weight-for-age chart for 0 to 6 month old infants]
+    
 
 with tab3:
     st.header("家庭常备药剂量 (发热用)")
