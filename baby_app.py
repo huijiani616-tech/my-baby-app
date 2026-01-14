@@ -1,108 +1,99 @@
 import streamlit as st
 from datetime import date
-import google.generativeai as genai
 
-# --- 1. 页面风格美化 (Marketing Branding) ---
-st.set_page_config(page_title="萌宝导航 - AI 智能育儿", page_icon="👼")
+# --- 1. 界面设计 ---
+st.set_page_config(page_title="萌宝导航 - 纯净版", page_icon="👶")
 
 st.markdown("""
     <style>
-    .stApp {
-        background-color: #FFF9F5; /* 暖米色背景 */
+    .stApp { background-color: #FDFCFB; }
+    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #F8F9FA;
+        border-radius: 10px 10px 0px 0px;
+        padding: 10px;
     }
-    .st-emotion-cache-1cvow48 {
-        border-radius: 15px; /* 圆角设计 */
-    }
-    h1 {
-        color: #FF8C94; /* 珊瑚粉色标题 */
-    }
+    .main-header { color: #E88D67; text-align: center; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. 侧边栏及基础逻辑 ---
+# --- 2. 侧边栏 ---
 st.sidebar.header("👶 宝宝档案")
-# 默认填入你宝宝的信息
 birth_date = st.sidebar.date_input("出生日期", date(2025, 9, 29))
 current_weight = st.sidebar.number_input("当前体重 (kg)", value=7.25, step=0.1)
-api_key = st.sidebar.text_input("填入你的 Gemini API Key", type="password")
 
 # 计算月龄
-today = date.today()
-age_days = (today - birth_date).days
+age_days = (date.today() - birth_date).days
 age_months = age_days / 30.44
 
-st.title("👼 萌宝成长导航")
-st.subheader(f"宝宝今天 {int(age_months)} 个月 {int(age_days % 30.44)} 天大啦！")
+st.markdown(f"<h1 class='main-header'>萌宝成长导航</h1>", unsafe_allow_html=True)
+st.write(f"<p style='text-align: center;'>宝宝今天 <b>{int(age_months)}</b> 个月 <b>{int(age_days % 30.44)}</b> 天大啦！</p>", unsafe_allow_html=True)
 
-# --- 3. 核心功能标签页 ---
-tab1, tab2, tab3, tab4 = st.tabs(["🍼 科学喂养", "📈 生长曲线", "💊 安全用药", "📝 发育自测"])
+# --- 3. 核心功能 ---
+tab1, tab2, tab3, tab4 = st.tabs(["🍼 喂养建议", "📈 生长指标", "💊 用药参考", "📝 发育打卡"])
 
 with tab1:
-    st.header("奶量计算器")
+    st.header("奶量计算 (150ml/kg法)")
     total_milk = current_weight * 150
+    st.metric("建议每日总奶量", f"{int(total_milk)} ml")
+    
     col1, col2 = st.columns(2)
-    col1.metric("建议总奶量", f"{int(total_milk)} ml")
-    col2.metric("建议餐数", "5 顿")
-    st.write(f"建议每顿奶量约为 **{int(total_milk/5)} ml**。")
-    st.info("💡 3-4个月宝宝可能会进入厌奶期，如果精神好、尿布满，不要过度焦虑哦。")
+    col1.write("**分餐建议：**")
+    col1.write("- 5 顿制: 每顿约 " + str(int(total_milk/5)) + " ml")
+    col1.write("- 6 顿制: 每顿约 " + str(int(total_milk/6)) + " ml")
+    
+    st.info("💡 此时期宝宝视力范围扩大，喂奶时容易被周围吸引，建议在安静阴暗的环境下喂哺。")
 
 with tab2:
-    st.header("WHO 生长百分位参考")
-    # 模拟 WHO 3个月男婴标准：中位数约为 6.4kg，85%约为 7.2kg
-    if current_weight > 7.0:
-        st.success(f"宝宝当前体重 {current_weight}kg，处于同龄宝宝的**前 15% (壮硕型)**，长得真棒！")
-    else:
-        st.info("宝宝体重处于标准中位数水平，非常健康。")
-    st.caption("注：此数据基于 WHO 0-6月生长标准。")
+    st.header("WHO 生长曲线对比")
+    # 简单的 WHO 男婴 3-4 月体重参考
+    st.write("根据 WHO 标准，3.5 个月男婴体重范围：")
+    st.write("- **偏瘦：** < 5.8 kg")
+    st.write("- **标准：** 5.8 kg - 7.5 kg")
+    st.write("- **壮硕：** > 7.5 kg")
     
+    if current_weight > 7.5:
+        st.success(f"当前体重 {current_weight}kg：长势喜人，超过了 85% 的同龄宝宝！")
+    elif current_weight < 5.8:
+        st.warning(f"当前体重 {current_weight}kg：偏轻，建议咨询医生是否需要增加喂养频率。")
+    else:
+        st.success(f"当前体重 {current_weight}kg：处于非常完美的标准区间！")
+    
+    [Image of WHO weight-for-age chart for 0 to 6 month old infants]
 
 with tab3:
-    st.header("急救用药（发热 38.5℃+）")
-    st.warning("⚠️ 剂量严格按体重计算，请务必核对包装浓度！")
+    st.header("家庭常备药剂量 (发热用)")
+    st.error("⚠️ 仅用于体温 > 38.5℃ 情况。剂量随体重实时计算，请严格核对浓度！")
     
-    c1, c2 = st.columns(2)
-    with c1:
-        st.subheader("对乙酰氨基酚")
-        st.code(f"每次: {(current_weight * 12.5) / 100:.1f} ml", language=None)
-        st.caption("参考泰诺林(100mg/ml)")
-    with c2:
-        st.subheader("布洛芬")
-        st.code(f"每次: {(current_weight * 10) / 20:.1f} ml", language=None)
-        st.caption("参考美林(20mg/ml)")
+    st.subheader("1. 对乙酰氨基酚 (如泰诺林)")
+    st.info(f"浓度 100mg/ml：每次建议滴入 **{(current_weight * 12.5) / 100:.1f} ml**")
+    
+    st.subheader("2. 布洛芬 (如美林)")
+    st.info(f"浓度 20mg/ml：每次建议喂入 **{(current_weight * 10) / 20:.1f} ml**")
+    
+    st.caption("注：两次给药需间隔 4-6 小时，24小时内不超过 4 次。")
 
 with tab4:
-    st.header("3-4个月发育里程碑")
+    st.header(f"{int(age_months)}个月里程碑自测")
     checklist = [
-        "俯卧时能否抬头 90 度并用手臂撑起？",
-        "是否会大声笑出声？",
-        "小手是否能主动抓握面前的玩具？",
-        "视线是否能灵活追随移动的物体？"
+        "趴着时能稳稳抬头 90 度吗？",
+        "会寻找声音的来源吗？",
+        "能够自发地微笑吗？",
+        "视线能随着移动的物体转动吗？"
     ]
+    
+    score = 0
     for item in checklist:
-        st.checkbox(item)
-    if st.button("生成发育简报"):
-        st.write("🎉 太棒了！宝宝正在按节奏探索世界，记得多和宝宝说话哦。")
+        if st.checkbox(item):
+            score += 1
+    
+    progress = score / len(checklist)
+    st.progress(progress)
+    st.write(f"完成度：{int(progress * 100)}%")
+    
+    if score == len(checklist):
+        st.balloons()
+        st.success("宝宝发育超标！继续加油！")
 
-# --- 4. 接入 AI 大脑 ---
 st.divider()
-st.subheader("💬 育儿专家 AI 咨询")
-
-if api_key:
-    try:
-        genai.configure(api_key=api_key)
-        # 使用最基础的模型名称，兼容性最强
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
-        user_q = st.text_input("有什么想问专家的？", placeholder="比如：宝宝最近总流口水是要长牙吗？")
-        if user_q:
-            with st.spinner("专家正在查阅资料..."):
-                # 简化 Prompt，减少解析错误
-                response = model.generate_content(user_q)
-                st.write("---")
-                st.markdown(f"**专家建议：**\n\n{response.text}")
-    except Exception as e:
-        # 这里会显示具体的错误原因，帮我们精准定位
-        st.error(f"连接失败。请检查 Key 是否正确或网络是否稳定。报错信息：{e}")
-else:
-    st.info("🔑 请在左侧边栏输入你的 API Key 以激活 AI 功能。")
-
+st.caption("© 2026 萌宝导航 - 妈妈的私人育儿小助手")
