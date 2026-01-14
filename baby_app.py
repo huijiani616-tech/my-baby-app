@@ -89,7 +89,7 @@ st.subheader("💬 育儿专家 AI 咨询")
 
 if api_key:
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('models/gemini-1.5-flash')
     
     user_q = st.text_input("有什么想问专家的？", placeholder="比如：宝宝最近总流口水是要长牙吗？")
     if user_q:
@@ -99,4 +99,5 @@ if api_key:
             st.write("---")
             st.write(f"**专家建议：**\n\n{response.text}")
 else:
+
     st.info("🔑 请在左侧边栏输入你的 Gemini API Key 以激活 AI 对话功能。")
