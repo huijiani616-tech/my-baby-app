@@ -88,16 +88,21 @@ st.divider()
 st.subheader("💬 育儿专家 AI 咨询")
 
 if api_key:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('models/gemini-1.5-flash')
-    
-    user_q = st.text_input("有什么想问专家的？", placeholder="比如：宝宝最近总流口水是要长牙吗？")
-    if user_q:
-        with st.spinner("专家正在查阅资料..."):
-            system_prompt = f"你是一个温柔的育儿专家。针对一个{int(age_months)}个月大、体重{current_weight}kg的宝宝，回答妈妈的问题：{user_q}"
-            response = model.generate_content(system_prompt)
-            st.write("---")
-            st.write(f"**专家建议：**\n\n{response.text}")
+    try:
+        genai.configure(api_key=api_key)
+        # 使用最基础的模型名称，兼容性最强
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        user_q = st.text_input("有什么想问专家的？", placeholder="比如：宝宝最近总流口水是要长牙吗？")
+        if user_q:
+            with st.spinner("专家正在查阅资料..."):
+                # 简化 Prompt，减少解析错误
+                response = model.generate_content(user_q)
+                st.write("---")
+                st.markdown(f"**专家建议：**\n\n{response.text}")
+    except Exception as e:
+        # 这里会显示具体的错误原因，帮我们精准定位
+        st.error(f"连接失败。请检查 Key 是否正确或网络是否稳定。报错信息：{e}")
 else:
+    st.info("🔑 请在左侧边栏输入你的 API Key 以激活 AI 功能。")
 
-    st.info("🔑 请在左侧边栏输入你的 Gemini API Key 以激活 AI 对话功能。")
